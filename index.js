@@ -37,6 +37,7 @@ async function run() {
 
     app.get('/api/jobs', async ( req,res) => {
       const query = {};
+
       if (req.query.companyId) {
         query.companyId = req.query.companyId;
       }
@@ -51,7 +52,12 @@ async function run() {
 
     app.post('/api/jobs', async (req,res) => {
       const job = req.body;
-      const result = await jobCollection.insertOne(job); res.send(result);
+      const newJOb = {
+        ...job,
+        createdAt: new Date()
+      }
+
+      const result = await jobCollection.insertOne(newJOb); res.send(result);
     });
 
     //company related api
@@ -68,7 +74,12 @@ async function run() {
 
     app.post('/api/companies', async (req, res) => {
       const company = req.body;
-      const result = await companyCollection.insertOne(company);
+      const newCompany = {
+        ...company,
+        createdAt: new Date()
+      }
+
+      const result = await companyCollection.insertOne(newCompany);
       res.send(result);
     })
 
