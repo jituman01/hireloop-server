@@ -1,8 +1,12 @@
-const express = require('express')
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const express = require('express')
+const cors = require('cors');
 const app = express()
 const port = 8080
 require('dotenv').config();
+
+app.use(cors());
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -26,6 +30,45 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const database = client.db("hireloop_db");
+    const jobCollection = database.collection("jobs");
+    const companyCollection = database.collection("companies");
+
+    app.get('/api/jobs', async ( req,res) => {
+      const query = {};
+      if (req.query.companyId) {
+        query.companyId = req.query.companyId;
+      }
+      if (req.query.status) {
+        query.status = req.query.status;
+      }
+      const cursor = jobCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+
+    app.post('/api/jobs', async (req,res) => {
+      const job = req.body;
+      const result = await jobCollection.insertOne(job); res.send(result);
+    });
+
+    //company related api
+    app.post('/api/companies', async (req, res) => {
+      const company = req.body;
+      const result = await companyCollection.insertOne(company);
+      res.send(result);
+    })
+
+
+
+
+
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
